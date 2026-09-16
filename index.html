@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MajiHesabu - Customer Portal v3.1</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💧</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+  <header class="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg sticky top-0 z-40">
+    <div class="container mx-auto px-4 py-3 text-center">
+      <h1 class="text-2xl font-bold">💧 MajiHesabu</h1>
+      <p class="text-xs text-blue-200" id="headerCompany">Customer Portal v3.1</p>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-6 max-w-3xl flex-1">
+
+    <!-- LOGIN SECTION -->
+    <div id="loginSection" class="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">🔓 Login</h2>
+      <div id="loginMsg" class="mb-4"></div>
+      <form onsubmit="custLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
+          <input type="tel" id="custPhone" placeholder="+254700000001 or 0700000001" class="w-full border p-3 rounded" required>
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">Meter Number</label>
+          <input type="text" id="custMeter" placeholder="e.g., M-00123" class="w-full border p-3 rounded" required>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded">🔓 Login</button>
+      </form>
+    </div>
+
+    <!-- CUSTOMER DASHBOARD -->
+    <div id="custDash" class="hidden space-y-6">
+
+      <!-- WELCOME CARD -->
+      <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg shadow-lg p-6">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-xs text-blue-200">Welcome</p>
+            <h2 id="custName" class="text-2xl font-bold mt-1">Customer</h2>
+            <p id="custMeterDisplay" class="text-sm text-blue-200 mt-2">Meter: M-0000</p>
+          </div>
+          <button onclick="custLogout()" class="bg-red-500 hover:bg-red-600 px-3 py-2 rounded font-bold text-sm">Logout</button>
+        </div>
+      </div>
+
+      <!-- ACCOUNT SUMMARY -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-600">
+          <p class="text-xs text-gray-600 font-bold">Account ID</p>
+          <p id="custId" class="text-lg font-bold text-gray-800 mt-2">J001</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-600">
+          <p class="text-xs text-gray-600 font-bold">Account Type</p>
+          <p id="custType" class="text-lg font-bold text-gray-800 mt-2">Tenant</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-600">
+          <p class="text-xs text-gray-600 font-bold">Status</p>
+          <p id="custStatus" class="text-lg font-bold text-green-600 mt-2">✅ Active</p>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="flex gap-2 bg-gray-200 p-2 rounded-lg overflow-x-auto flex-wrap">
+        <button onclick="custTab('invoices')" class="custTabBtn py-2 px-3 rounded bg-white text-blue-600 font-bold text-sm whitespace-nowrap">📋 Recent Invoices</button>
+        <button onclick="custTab('history')" class="custTabBtn py-2 px-3 rounded text-gray-700 font-bold text-sm whitespace-nowrap hover:bg-white">📊 6-Month History</button>
+        <button onclick="custTab('contact')" class="custTabBtn py-2 px-3 rounded text-gray-700 font-bold text-sm whitespace-nowrap hover:bg-white">📞 Contact</button>
+      </div>
+
+      <!-- TAB CONTENTS -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+
+        <!-- INVOICES TAB -->
+        <div id="invoicesTab">
+          <h3 class="text-lg font-bold mb-4">📋 Recent Invoices</h3>
+          <button onclick="custLoadInvoices()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold mb-4 text-sm">🔄 Refresh</button>
+          <div id="invoicesList" class="space-y-3">Loading...</div>
+        </div>
+
+        <!-- HISTORY TAB (6 MONTHS) -->
+        <div id="historyTab" class="hidden">
+          <h3 class="text-lg font-bold mb-4">📊 6-Month Transaction History</h3>
+          <button onclick="custLoadHistory()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold mb-4 text-sm">🔄 Refresh</button>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="border p-2 text-left">Date</th>
+                  <th class="border p-2 text-left">Type</th>
+                  <th class="border p-2 text-left">Reference</th>
+                  <th class="border p-2 text-right">Amount</th>
+                  <th class="border p-2 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="historyList">
+                <tr><td colspan="5" class="border p-4 text-center text-gray-600">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CONTACT TAB -->
+        <div id="contactTab" class="hidden">
+          <h3 class="text-lg font-bold mb-4">📞 Contact Us</h3>
+          <div class="space-y-4">
+            <div class="bg-blue-50 p-4 rounded border border-blue-200">
+              <p class="font-bold text-gray-800 mb-2">📞 Phone</p>
+              <p id="contactPhone1" class="text-sm text-gray-700">+254 768 789 382</p>
+              <p id="contactPhone2" class="text-sm text-gray-700">+254 713 742 927</p>
+            </div>
+            <div class="bg-green-50 p-4 rounded border border-green-200">
+              <p class="font-bold text-gray-800 mb-2">💬 WhatsApp</p>
+              <a id="whatsappLink" href="https://wa.me/254768789382" target="_blank" class="text-green-600 hover:underline text-sm font-bold">Chat with us on WhatsApp</a>
+            </div>
+            <div class="bg-orange-50 p-4 rounded border border-orange-200">
+              <p class="font-bold text-gray-800 mb-2">💰 M-Pesa Payment</p>
+              <p id="mpesaTill" class="text-sm text-gray-700 font-bold">Till Number: 5663845</p>
+              <p id="mpesaBusiness" class="text-xs text-gray-600 mt-2">Business Name: Joy Water Supplies</p>
+            </div>
+            <div class="bg-gray-100 p-4 rounded border border-gray-300">
+              <p class="font-bold text-gray-800 mb-2">📧 Email</p>
+              <p id="contactEmail" class="text-sm text-gray-700">joywatersupplies@gmail.com</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-gray-800 text-gray-300 text-center py-3 mt-8">
+    <p class="text-sm">🔐 <span id="footerCompany">Joy Water Supplies</span> | <strong>MajiHesabu</strong> Water Billing System</p>
+    <p class="text-xs text-gray-500 mt-1">✨ Powered by <strong>Albuk Technologies</strong></p>
+  </footer>
+
+  <!-- INVOICE MODAL -->
+  <div id="custInvoiceModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto">
+      <div id="custInvoiceContent" class="p-6"></div>
+      <div class="flex gap-2 p-6 border-t bg-gray-50">
+        <button onclick="custPrintInvoice()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold text-sm">🖨️ Print</button>
+        <button onclick="custShareWhatsApp()" class="flex-1 bg-green-600 text-white py-2 rounded font-bold text-sm">💬 Share WhatsApp</button>
+        <button onclick="custCloseInvoice()" class="flex-1 bg-gray-600 text-white py-2 rounded font-bold text-sm">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "https://script.google.com/macros/s/AKfycbwOcuCF8XUv5agKrjqa482JchrojGDxTCll0kCU_Geued_-2vqBr23-wVVP6SoSOt0V/exec";
+    let customer = null;
+    let currentInvoice = null;
+    let appConfig = {};
+
+    // Load configuration on page load
+    async function loadConfig() {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getConfig' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          appConfig = data.config;
+          document.getElementById('footerCompany').innerText = appConfig.COMPANY_NAME;
+          document.getElementById('headerCompany').innerText = appConfig.COMPANY_NAME;
+          document.getElementById('mpesaTill').innerText = 'Till Number: ' + appConfig.MPESA_TILL;
+          document.getElementById('mpesaBusiness').innerText = 'Business Name: ' + appConfig.COMPANY_NAME;
+          document.getElementById('contactEmail').innerText = appConfig.COMPANY_EMAIL;
+          document.getElementById('whatsappLink').href = 'https://wa.me/254768789382';
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function custLogin(e) {
+      e.preventDefault();
+      const phone = document.getElementById('custPhone').value;
+      const meter = document.getElementById('custMeter').value;
+
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'authenticate', phone: phone, meterNumber: meter })
+        });
+        const data = await res.json();
+
+        if (data.authenticated) {
+          customer = data;
+          localStorage.setItem('customer', JSON.stringify(customer));
+          showCustDash();
+          custLoadInvoices();
+        } else {
+          document.getElementById('loginMsg').innerHTML = '<div class="p-3 bg-red-100 text-red-700 rounded text-sm">❌ Invalid phone or meter</div>';
+        }
+      } catch(err) {
+        document.getElementById('loginMsg').innerHTML = '<div class="p-3 bg-red-100 text-red-700 rounded text-sm">❌ Error: ' + err.message + '</div>';
+      }
+    }
+
+    function showCustDash() {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('custDash').classList.remove('hidden');
+
+      document.getElementById('custId').innerText = customer.customerId || 'J001';
+      document.getElementById('custName').innerText = customer.name || 'Customer';
+      document.getElementById('custMeterDisplay').innerText = 'Meter: ' + (customer.meterNumber || 'M-0000');
+      document.getElementById('custType').innerText = customer.type || 'Tenant';
+      document.getElementById('custStatus').innerText = '✅ ' + (customer.status || 'Active');
+    }
+
+    async function custLoadInvoices() {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getInvoices', customerId: customer.customerId })
+        });
+        const data = await res.json();
+
+        if (data.success && data.invoices.length > 0) {
+          document.getElementById('invoicesList').innerHTML = data.invoices.slice(0, 5).map(inv => {
+            const dateStr = new Date(inv.date).toLocaleDateString('en-KE');
+            return `
+              <div class="p-4 border rounded-lg ${inv.status === 'PAID' ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="font-bold text-gray-800">${dateStr}</p>
+                    <p class="text-xs text-gray-600 mt-1">Consumption: <span class="font-bold">${inv.consumption}</span> units</p>
+                    <p class="text-xs text-gray-600">Amount: <span class="font-bold">KES ${Number(inv.amount).toLocaleString()}</span></p>
+                  </div>
+                  <div class="flex flex-col gap-2">
+                    <span class="px-2 py-1 rounded text-xs font-bold ${inv.status === 'PAID' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}">
+                      ${inv.status}
+                    </span>
+                    <button onclick="custViewInvoice('${inv.invoiceId}')" class="px-2 py-1 rounded text-xs font-bold bg-blue-600 text-white hover:bg-blue-700">View</button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          document.getElementById('invoicesList').innerHTML = '<p class="text-center text-gray-600">No invoices found</p>';
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function custLoadHistory() {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getTransactionHistory', customerId: customer.customerId })
+        });
+        const data = await res.json();
+
+        if (data.success && data.transactions.length > 0) {
+          document.getElementById('historyList').innerHTML = data.transactions.map(tx => {
+            const dateStr = new Date(tx.date).toLocaleDateString('en-KE');
+            const amountClass = tx.type === 'Invoice' ? 'text-red-600' : 'text-green-600';
+            
+            return `
+              <tr class="hover:bg-gray-50">
+                <td class="border p-2 text-xs">${dateStr}</td>
+                <td class="border p-2 text-xs">${tx.type === 'Invoice' ? '📋 Invoice' : '💳 Payment'}</td>
+                <td class="border p-2 text-xs font-mono">${tx.invoiceId || tx.paymentId}</td>
+                <td class="border p-2 text-right font-bold ${amountClass}">KES ${Number(tx.amount).toLocaleString()}</td>
+                <td class="border p-2 text-center">
+                  <span class="px-2 py-1 rounded text-xs font-bold ${tx.type === 'Invoice' && tx.status === 'UNPAID' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
+                    ${tx.status || (tx.type === 'Payment' ? 'Posted' : 'Unpaid')}
+                  </span>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          document.getElementById('historyList').innerHTML = '<tr><td colspan="5" class="border p-4 text-center text-gray-600">No transactions found</td></tr>';
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function custViewInvoice(invId) {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getInvoiceById', invoiceId: invId })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          currentInvoice = data.invoice;
+          renderCustInvoice();
+          document.getElementById('custInvoiceModal').classList.remove('hidden');
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    function renderCustInvoice() {
+      const i = currentInvoice;
+      const dateStr = new Date(i.date).toLocaleDateString('en-KE');
+
+      document.getElementById('custInvoiceContent').innerHTML = `
+        <div class="font-sans text-sm">
+          <div class="text-center mb-4 pb-3 border-b-2">
+            <div class="text-lg font-bold text-blue-600">${appConfig.COMPANY_NAME || 'JOY WATER SUPPLIES'}</div>
+            <div class="text-xs text-gray-600">${appConfig.COMPANY_PHONE}</div>
+            <div class="text-lg font-bold text-blue-600 mt-2">INVOICE</div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mb-3 text-xs">
+            <div><p class="font-bold">NAME: ${i.name}</p><p class="font-bold">METER: ${i.meterNumber}</p></div>
+            <div class="text-right"><p class="font-bold">Date: ${dateStr}</p><p class="font-bold">TILL: ${appConfig.MPESA_TILL}</p></div>
+          </div>
+
+          <table class="w-full text-xs border-collapse mb-3">
+            <thead>
+              <tr class="border-b-2 border-gray-400">
+                <th class="text-left p-1">DESCRIPTION</th>
+                <th class="text-right p-1">READINGS</th>
+                <th class="text-right p-1">UNITS</th>
+                <th class="text-right p-1">RATE</th>
+                <th class="text-right p-1">AMOUNT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b"><td class="p-1">Previous Reading</td><td class="text-right p-1 font-mono">${i.previousReading}</td><td></td><td></td><td></td></tr>
+              <tr class="border-b"><td class="p-1">Current Reading</td><td class="text-right p-1 font-mono">${i.currentReading}</td><td></td><td></td><td></td></tr>
+              <tr class="border-b-2 border-gray-400"><td class="p-1 font-bold">Consumption</td><td></td><td class="text-right p-1 font-bold">${i.consumption}</td><td class="text-right p-1 font-bold">${i.rate}</td><td class="text-right p-1 font-bold">KES ${Number(i.amount).toLocaleString()}</td></tr>
+            </tbody>
+          </table>
+
+          <div class="flex justify-between items-center border-t-2 border-gray-400 pt-2 font-bold">
+            <div>TOTAL</div>
+            <div class="text-lg text-blue-600">KES ${Number(i.amount).toLocaleString()}</div>
+          </div>
+
+          <div class="text-center mt-3 text-xs"><p>Status: ${i.status}</p><p class="text-blue-600 font-bold mt-2">Accounts are due on demand</p></div>
+        </div>
+      `;
+    }
+
+    function custCloseInvoice() {
+      document.getElementById('custInvoiceModal').classList.add('hidden');
+    }
+
+    function custPrintInvoice() {
+      const printWindow = window.open('', '', 'height=600,width=800');
+      printWindow.document.write(document.getElementById('custInvoiceContent').innerHTML);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    function custShareWhatsApp() {
+      if (!currentInvoice) return;
+      const i = currentInvoice;
+      const msg = encodeURIComponent(
+        `Hello ${i.name},\n\nYour water invoice is ready:\n\n` +
+        `Meter: ${i.meterNumber}\n` +
+        `Consumption: ${i.consumption} units @ KES ${i.rate}\n` +
+        `TOTAL DUE: KES ${Number(i.amount).toLocaleString()}\n\n` +
+        `Please pay via M-Pesa Till: ${appConfig.MPESA_TILL}\n` +
+        `Thank you for choosing ${appConfig.COMPANY_NAME || 'Joy Water Supplies'}!`
+      );
+      const phone = currentInvoice.phone.replace(/[^0-9]/g, '');
+      window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+    }
+
+    function custTab(name) {
+      document.querySelectorAll('[id$="Tab"]').forEach(el => el.classList.add('hidden'));
+      document.getElementById(name + 'Tab').classList.remove('hidden');
+      document.querySelectorAll('.custTabBtn').forEach(el => {
+        el.classList.remove('bg-white', 'text-blue-600');
+      });
+      event.target.classList.add('bg-white', 'text-blue-600');
+    }
+
+    function custLogout() {
+      customer = null;
+      localStorage.removeItem('customer');
+      location.reload();
+    }
+
+    // Check saved session
+    window.addEventListener('DOMContentLoaded', () => {
+      loadConfig();
+      const saved = localStorage.getItem('customer');
+      if (saved) {
+        customer = JSON.parse(saved);
+        showCustDash();
+        custLoadInvoices();
+      }
+    });
+  </script>
+
+</body>
+</html>
