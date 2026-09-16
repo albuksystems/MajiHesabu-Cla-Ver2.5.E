@@ -373,7 +373,7 @@
   </div>
 
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbyhj9b-UUX0Yt3yonu6rGpnf5H6Lq4VpUSLfgzwL12Dm25Iw9OciC3-9UHQUj9qfSyh/exec";
+    const API = "https://script.google.com/macros/s/AKfycbz7CC5O-txelyU2cQr7AdOykcACmBMckzwgIeffnBw-xpJ17A4dbRnahrBNy_atxtzG/exec";
     let admin = null;
     let currentInvoice = null;
     let currentCustomer = null;
@@ -619,8 +619,10 @@
         const data = await res.json();
         
         if (data.success && data.customers.length > 0) {
-          // Find customer by meter number
-          const customer = data.customers.find(c => c.meterNumber.toUpperCase() === meterNo);
+          // Find customer by meter number (with null check)
+          const customer = data.customers.find(c => 
+            c.meterNumber && String(c.meterNumber).toUpperCase() === meterNo
+          );
           
           if (customer) {
             // Populate customer ID field
