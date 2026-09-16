@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MajiHesabu - Admin v3.1</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💧</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+  <header class="bg-gradient-to-r from-pink-600 to-pink-700 text-white shadow-lg sticky top-0 z-40">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold">💧 MajiHesabu</h1>
+        <p class="text-xs text-pink-100">Admin Portal v3.1 - Variable Pricing</p>
+      </div>
+      <div class="flex gap-2 items-center">
+        <span id="userRole" class="text-xs bg-pink-500 px-3 py-1 rounded">Admin</span>
+        <button id="logoutBtn" class="hidden bg-red-500 hover:bg-red-600 px-4 py-2 rounded font-bold text-sm" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-6 max-w-7xl flex-1">
+
+    <!-- LOGIN -->
+    <div id="loginSection" class="max-w-md mx-auto">
+      <div class="bg-white rounded-lg shadow-lg p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">🔐 Admin Login</h2>
+        <div id="loginMsg" class="mb-4"></div>
+        <form onsubmit="login(event)">
+          <input type="text" id="adminPhone" placeholder="Admin Phone" class="w-full border p-3 rounded mb-3" required>
+          <input type="password" id="adminPass" placeholder="Passcode" class="w-full border p-3 rounded mb-4" required>
+          <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded">Login</button>
+        </form>
+        <p class="text-center text-xs text-gray-600 mt-4">Passcode: MajiAdmin2026</p>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashSection" class="hidden space-y-6">
+
+      <!-- STATS -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-lg shadow p-5 border-l-4 border-pink-600">
+          <p class="text-sm text-gray-600 font-bold">Total Revenue</p>
+          <p class="text-3xl font-bold text-gray-800 mt-2">KES <span id="totalRev">0</span></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-5 border-l-4 border-green-600">
+          <p class="text-sm text-gray-600 font-bold">Collected</p>
+          <p class="text-3xl font-bold text-gray-800 mt-2">KES <span id="totalCol">0</span></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-5 border-l-4 border-red-600">
+          <p class="text-sm text-gray-600 font-bold">Outstanding</p>
+          <p class="text-3xl font-bold text-gray-800 mt-2">KES <span id="totalOut">0</span></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-5 border-l-4 border-orange-600">
+          <p class="text-sm text-gray-600 font-bold">Collection Rate</p>
+          <p class="text-3xl font-bold text-gray-800 mt-2"><span id="collRate">0</span>%</p>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="flex gap-2 bg-gray-200 p-2 rounded-lg overflow-x-auto flex-wrap">
+        <button onclick="tab('dashboard')" class="tabBtn py-2 px-3 rounded bg-white text-pink-600 font-bold text-sm whitespace-nowrap">📊 Dashboard</button>
+        <button onclick="tab('customers')" class="tabBtn py-2 px-3 rounded text-gray-700 font-bold text-sm whitespace-nowrap hover:bg-white">👥 Customers</button>
+        <button onclick="tab('search')" class="tabBtn py-2 px-3 rounded text-gray-700 font-bold text-sm whitespace-nowrap hover:bg-white">🔍 Search</button>
+        <button onclick="tab('addCustomer')" class="tabBtn py-2 px-3 rounded text-gray-700 font-bold text-sm whitespace-nowrap hover:bg-white">➕ Add Customer</button>
+        <button onclick="tab('meter')" class="tabBtn py-2 px-3 rounded text-gray-700 font-bold text-sm whitespace-nowrap hover:bg-white">📏 Meter Reading</button>
+        <button onclick="tab('payment')" class="tabBtn py-2 px-3 rounded text-gray-700 font-bold text-sm whitespace-nowrap hover:bg-white">💳 Payment</button>
+        <button onclick="tab('invoices')" class="tabBtn py-2 px-3 rounded text-gray-700 font-bold text-sm whitespace-nowrap hover:bg-white">📋 Invoices</button>
+        <button onclick="tab('debtors')" class="tabBtn py-2 px-3 rounded text-gray-700 font-bold text-sm whitespace-nowrap hover:bg-white">⚠️ Debtors</button>
+        <button onclick="tab('owner')" class="tabBtn py-2 px-3 rounded text-gray-700 font-bold text-sm whitespace-nowrap hover:bg-white">👨‍💼 Owner Report</button>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+
+        <!-- Dashboard Tab -->
+        <div id="dashboardTab">
+          <h3 class="text-lg font-bold mb-4">📊 System Overview</h3>
+          <button onclick="loadDash()" class="bg-pink-600 text-white px-4 py-2 rounded font-bold mb-4">🔄 Refresh</button>
+          <div id="dashContent" class="grid grid-cols-2 gap-4">
+            <div class="bg-blue-50 p-4 rounded"><p class="text-sm text-gray-600">Total Invoices</p><p class="text-2xl font-bold text-blue-600" id="totalInv">0</p></div>
+            <div class="bg-green-50 p-4 rounded"><p class="text-sm text-gray-600">Paid Invoices</p><p class="text-2xl font-bold text-green-600" id="paidInv">0</p></div>
+          </div>
+        </div>
+
+        <!-- Customers Tab -->
+        <div id="customersTab" class="hidden">
+          <h3 class="text-lg font-bold mb-4">👥 All Customers</h3>
+          <button onclick="loadCusts()" class="bg-pink-600 text-white px-4 py-2 rounded font-bold mb-4">🔄 Refresh</button>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="border p-2 text-left">ID</th>
+                  <th class="border p-2 text-left">Name</th>
+                  <th class="border p-2 text-left">Phone</th>
+                  <th class="border p-2 text-left">Meter</th>
+                  <th class="border p-2 text-left">Type</th>
+                  <th class="border p-2 text-center">Rate</th>
+                  <th class="border p-2 text-right">Outstanding</th>
+                  <th class="border p-2 text-center">Status</th>
+                  <th class="border p-2 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="custList"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Search Tab -->
+        <div id="searchTab" class="hidden">
+          <h3 class="text-lg font-bold mb-4">🔍 Search Customers</h3>
+          <div class="flex gap-2 mb-4">
+            <input type="text" id="searchInput" placeholder="Search by ID, name, phone, or meter..." class="flex-1 border p-3 rounded">
+            <button onclick="doSearch()" class="bg-pink-600 text-white px-4 py-2 rounded font-bold">Search</button>
+          </div>
+          <div id="searchResults"></div>
+        </div>
+
+        <!-- Add Customer Tab -->
+        <div id="addCustomerTab" class="hidden">
+          <h3 class="text-lg font-bold mb-4">➕ Register New Customer</h3>
+          <form onsubmit="addCust(event)" class="max-w-2xl space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <input type="tel" id="custPhone" placeholder="Phone" class="border p-3 rounded" required>
+              <input type="text" id="custName" placeholder="Name" class="border p-3 rounded" required>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <select id="custType" class="border p-3 rounded" required>
+                <option value="">Select Type</option>
+                <option value="Salty Water Vendor">Salty Water Vendor</option>
+                <option value="Apartment Tenant">Apartment Tenant</option>
+                <option value="Apartment Vendor">Apartment Vendor</option>
+              </select>
+              <input type="text" id="custMeter" placeholder="Meter No." class="border p-3 rounded" required>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <input type="text" id="custLoc" placeholder="Location" class="border p-3 rounded">
+              <input type="email" id="custEmail" placeholder="Email" class="border p-3 rounded">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <input type="number" id="custRate" placeholder="Water Rate per Unit (KES)" step="0.01" class="border p-3 rounded" required>
+              <p class="text-xs text-gray-600 pt-3">Leave empty for default rate</p>
+            </div>
+            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded">✅ Create Customer</button>
+          </form>
+          <div id="custMsg" class="mt-4 text-sm"></div>
+        </div>
+
+        <!-- Meter Reading Tab -->
+        <div id="meterTab" class="hidden">
+          <h3 class="text-lg font-bold mb-4">📏 Record Meter Reading</h3>
+          <form onsubmit="addReading(event)" class="max-w-2xl space-y-3">
+            <div>
+              <label class="block text-sm font-bold mb-2">Meter No.</label>
+              <input type="text" id="readCustId" placeholder="e.g., M-001" oninput="populateMeterDetails()" class="w-full border p-3 rounded" required>
+              <p id="custNameDisplay" class="text-xs text-gray-600 mt-1"></p>
+              <p id="custRateDisplay" class="text-xs text-blue-600 font-bold mt-1"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-bold mb-2">Customer ID (Auto-populated)</label>
+                <input type="text" id="readMeterId" placeholder="Auto-populated" readonly class="w-full border p-3 rounded bg-gray-100">
+              </div>
+              <div>
+                <label class="block text-sm font-bold mb-2">Previous Reading (Auto-populated)</label>
+                <input type="number" id="readPrev" placeholder="Auto" readonly step="0.1" class="w-full border p-3 rounded bg-gray-100">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <input type="number" id="readValue" placeholder="Current Reading" step="0.1" class="border p-3 rounded" required>
+              <input type="text" id="readBy" placeholder="Recorded By" class="border p-3 rounded" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded">📏 Record & Generate Invoice</button>
+          </form>
+          <div id="readMsg" class="mt-4 text-sm"></div>
+        </div>
+
+        <!-- Payment Tab -->
+        <div id="paymentTab" class="hidden">
+          <h3 class="text-lg font-bold mb-4">💳 Record Payment</h3>
+          <form onsubmit="recordPayment(event)" class="max-w-2xl space-y-3">
+            <div>
+              <label class="block text-sm font-bold mb-2">Customer ID</label>
+              <input type="text" id="payCustomerId" placeholder="Customer ID (e.g., J001)" oninput="populateCustomerName()" class="w-full border p-3 rounded" required>
+              <p id="payCustomerNameDisplay" class="text-sm font-bold text-blue-600 mt-2"></p>
+              <p id="payOutstandingDisplay" class="text-xs text-gray-600"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <input type="text" id="payInvoiceId" placeholder="Invoice ID (optional)" class="border p-3 rounded">
+              <input type="number" id="payAmount" placeholder="Amount" step="0.01" class="border p-3 rounded" required>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <select id="payMethod" class="border p-3 rounded" required>
+                <option value="">Payment Method</option>
+                <option value="Cash">Cash</option>
+                <option value="M-Pesa">M-Pesa</option>
+                <option value="Bank">Bank Transfer</option>
+              </select>
+              <input type="text" id="payRef" placeholder="Reference (required)" class="border p-3 rounded" required>
+            </div>
+            <input type="text" id="payNotes" placeholder="Notes (optional)" class="w-full border p-3 rounded">
+            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded">💳 Record Payment</button>
+          </form>
+          <div id="payMsg" class="mt-4 text-sm"></div>
+        </div>
+
+        <!-- Invoices Tab -->
+        <div id="invoicesTab" class="hidden">
+          <h3 class="text-lg font-bold mb-4">📋 All Invoices</h3>
+          <button onclick="loadInvs()" class="bg-pink-600 text-white px-4 py-2 rounded font-bold mb-4">🔄 Refresh</button>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="border p-2 text-left">ID</th>
+                  <th class="border p-2 text-left">Customer</th>
+                  <th class="border p-2 text-left">Meter</th>
+                  <th class="border p-2 text-center">Rate</th>
+                  <th class="border p-2 text-right">Amount</th>
+                  <th class="border p-2 text-center">Status</th>
+                  <th class="border p-2 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="invList"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Debtors Tab -->
+        <div id="debtorsTab" class="hidden">
+          <h3 class="text-lg font-bold mb-4">⚠️ Debtors Report</h3>
+          <button onclick="loadDebtors()" class="bg-pink-600 text-white px-4 py-2 rounded font-bold mb-4">🔄 Refresh</button>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="border p-2 text-left">Name</th>
+                  <th class="border p-2 text-left">Phone</th>
+                  <th class="border p-2 text-left">Meter</th>
+                  <th class="border p-2 text-center">Rate</th>
+                  <th class="border p-2 text-right">Amount Due</th>
+                  <th class="border p-2 text-center">Invoice</th>
+                  <th class="border p-2 text-center">Due Date</th>
+                </tr>
+              </thead>
+              <tbody id="debtorsList"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Owner Dashboard Tab -->
+        <div id="ownerTab" class="hidden">
+          <h3 class="text-lg font-bold mb-4">👨‍💼 Owner Dashboard - Outstanding Balances</h3>
+          <div class="mb-4 p-4 bg-green-50 border border-green-300 rounded">
+            <p class="text-sm text-gray-600">This Month Total Collections</p>
+            <p class="text-2xl font-bold text-green-600">KES <span id="ownerTotalMonth">0</span></p>
+          </div>
+          <button onclick="loadOwnerDash()" class="bg-pink-600 text-white px-4 py-2 rounded font-bold mb-4">🔄 Refresh</button>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="border p-2 text-left">Customer ID</th>
+                  <th class="border p-2 text-left">Name</th>
+                  <th class="border p-2 text-left">Phone</th>
+                  <th class="border p-2 text-left">Meter</th>
+                  <th class="border p-2 text-center">Rate</th>
+                  <th class="border p-2 text-right">Current Invoice</th>
+                  <th class="border p-2 text-right">Amount Paid</th>
+                  <th class="border p-2 text-right">Outstanding</th>
+                  <th class="border p-2 text-center">Payment Status</th>
+                  <th class="border p-2 text-left">Invoice Date</th>
+                  <th class="border p-2 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="ownerList"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-gray-800 text-gray-300 text-center py-3 mt-8">
+    <p class="text-sm">🔐 <span id="footerCompany">Joy Water Supplies</span> | <strong>MajiHesabu</strong> Water Billing System</p>
+    <p class="text-xs text-gray-500 mt-1">✨ Powered by <strong>Albuk Technologies</strong></p>
+  </footer>
+
+  <!-- VIEW/EDIT CUSTOMER MODAL -->
+  <div id="custModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg max-w-md w-full p-6 space-y-4 overflow-y-auto max-h-96">
+      <h3 class="text-lg font-bold">👤 Customer Details</h3>
+      <form id="custEditForm" onsubmit="saveCustEdits(event)">
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs font-bold">Customer ID</label>
+            <input type="text" id="modCustId" readonly class="w-full border p-2 rounded bg-gray-100 text-sm">
+          </div>
+          <div>
+            <label class="text-xs font-bold">Name</label>
+            <input type="text" id="modCustName" class="w-full border p-2 rounded text-sm" required>
+          </div>
+          <div>
+            <label class="text-xs font-bold">Phone</label>
+            <input type="tel" id="modCustPhone" class="w-full border p-2 rounded text-sm" required>
+          </div>
+          <div>
+            <label class="text-xs font-bold">Meter Number</label>
+            <input type="text" id="modCustMeter" class="w-full border p-2 rounded text-sm" required>
+          </div>
+          <div>
+            <label class="text-xs font-bold">Type</label>
+            <select id="modCustType" class="w-full border p-2 rounded text-sm" required>
+              <option value="Salty Water Vendor">Salty Water Vendor</option>
+              <option value="Apartment Tenant">Apartment Tenant</option>
+              <option value="Apartment Vendor">Apartment Vendor</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold">Location</label>
+            <input type="text" id="modCustLoc" class="w-full border p-2 rounded text-sm">
+          </div>
+          <div>
+            <label class="text-xs font-bold">Water Rate per Unit (KES)</label>
+            <input type="number" id="modCustRate" class="w-full border p-2 rounded text-sm" step="0.01" required>
+          </div>
+          <div>
+            <label class="text-xs font-bold">Status</label>
+            <select id="modCustStatus" class="w-full border p-2 rounded text-sm" required>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex gap-2 mt-4">
+          <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold text-sm">💾 Save</button>
+          <button type="button" onclick="closeCustModal()" class="flex-1 bg-gray-400 text-white py-2 rounded font-bold text-sm">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- INVOICE MODAL -->
+  <div id="invModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto shadow-xl">
+      <div id="invContent" class="p-6"></div>
+      <div class="flex gap-2 p-6 border-t bg-gray-50">
+        <button onclick="printInvoice()" type="button" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded font-bold text-sm cursor-pointer">🖨️ Print</button>
+        <button onclick="shareWhatsApp()" type="button" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded font-bold text-sm cursor-pointer">💬 Share WhatsApp</button>
+        <button onclick="closeInvModal()" type="button" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded font-bold text-sm cursor-pointer">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENT RECEIPT MODAL -->
+  <div id="paymentReceiptModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-xl">
+      <div id="receiptContent" class="space-y-3 text-center"></div>
+      <div class="flex gap-2 mt-6">
+        <button onclick="shareReceiptWhatsApp()" type="button" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded font-bold text-sm cursor-pointer">💬 Share Receipt</button>
+        <button onclick="closePaymentReceipt()" type="button" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white py-3 rounded font-bold text-sm cursor-pointer">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "https://script.google.com/macros/s/AKfycbz7CC5O-txelyU2cQr7AdOykcACmBMckzwgIeffnBw-xpJ17A4dbRnahrBNy_atxtzG/exec";
+    let admin = null;
+    let currentInvoice = null;
+    let currentCustomer = null;
+    let currentPayment = null;
+    let appConfig = {};
+
+    async function loadConfig() {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getConfig' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          appConfig = data.config;
+          document.getElementById('footerCompany').innerText = appConfig.COMPANY_NAME;
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function login(e) {
+      e.preventDefault();
+      const phone = document.getElementById('adminPhone').value;
+      const pass = document.getElementById('adminPass').value;
+
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'adminAuth', passcode: pass })
+        });
+        const data = await res.json();
+        
+        if (data.authenticated) {
+          admin = { phone, pass };
+          localStorage.setItem('admin', JSON.stringify(admin));
+          showDash();
+          loadDash();
+        } else {
+          document.getElementById('loginMsg').innerHTML = '<div class="p-3 bg-red-100 text-red-700 rounded text-sm">❌ Invalid passcode</div>';
+        }
+      } catch(err) {
+        document.getElementById('loginMsg').innerHTML = '<div class="p-3 bg-red-100 text-red-700 rounded text-sm">❌ Error: ' + err.message + '</div>';
+      }
+    }
+
+    function showDash() {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('dashSection').classList.remove('hidden');
+      document.getElementById('logoutBtn').classList.remove('hidden');
+    }
+
+    function logout() {
+      admin = null;
+      localStorage.removeItem('admin');
+      location.reload();
+    }
+
+    async function loadDash() {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getDashboard' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          const f = data.financials;
+          document.getElementById('totalRev').innerText = Number(f.totalRevenue).toLocaleString();
+          document.getElementById('totalCol').innerText = Number(f.totalCollected).toLocaleString();
+          document.getElementById('totalOut').innerText = Number(f.outstandingBalance).toLocaleString();
+          document.getElementById('collRate').innerText = Number(f.collectionRate).toFixed(1);
+          document.getElementById('totalInv').innerText = f.totalInvoices || 0;
+          document.getElementById('paidInv').innerText = f.paidInvoices || 0;
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function loadCusts() {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getAllCustomers' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          document.getElementById('custList').innerHTML = data.customers.map(c => `
+            <tr>
+              <td class="border p-2 font-mono text-xs">${c.customerId}</td>
+              <td class="border p-2">${c.name}</td>
+              <td class="border p-2 text-xs">${c.phone}</td>
+              <td class="border p-2">${c.meterNumber}</td>
+              <td class="border p-2 text-xs">${c.type}</td>
+              <td class="border p-2 text-center font-bold text-blue-600">KES ${Number(c.rate).toFixed(2)}</td>
+              <td class="border p-2 text-right font-bold text-red-600">KES ${Number(c.outstandingBalance).toLocaleString()}</td>
+              <td class="border p-2 text-center"><span class="px-2 py-1 rounded text-xs font-bold ${c.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${c.status}</span></td>
+              <td class="border p-2 text-center"><button onclick="editCust('${c.customerId}')" class="text-blue-600 hover:underline text-xs font-bold">Edit</button></td>
+            </tr>
+          `).join('');
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function doSearch() {
+      const query = document.getElementById('searchInput').value;
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'searchCustomers', query: query })
+        });
+        const data = await res.json();
+        
+        if (data.success && data.results.length > 0) {
+          document.getElementById('searchResults').innerHTML = '<div class="space-y-3">' + data.results.map(c => `
+            <div class="p-4 border rounded-lg bg-gray-50">
+              <p class="font-bold">${c.name} (${c.customerId})</p>
+              <p class="text-xs text-gray-600">Phone: ${c.phone} | Meter: ${c.meterNumber}</p>
+              <p class="text-xs text-gray-600">Type: ${c.type} | Rate: KES ${Number(c.rate).toFixed(2)} | Outstanding: KES ${Number(c.outstandingBalance).toLocaleString()}</p>
+              <button onclick="editCust('${c.customerId}')" class="mt-2 bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold">Edit Customer</button>
+            </div>
+          `).join('') + '</div>';
+        } else {
+          document.getElementById('searchResults').innerHTML = '<p class="text-center text-gray-600">No results found</p>';
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function editCust(custId) {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getCustomerById', customerId: custId })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          const c = data.customer;
+          currentCustomer = c;
+          document.getElementById('modCustId').value = c.customerId;
+          document.getElementById('modCustName').value = c.name;
+          document.getElementById('modCustPhone').value = c.phone;
+          document.getElementById('modCustMeter').value = c.meterNumber;
+          document.getElementById('modCustType').value = c.type;
+          document.getElementById('modCustLoc').value = c.location;
+          document.getElementById('modCustRate').value = c.rate;
+          document.getElementById('modCustStatus').value = c.status;
+          document.getElementById('custModal').classList.remove('hidden');
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    function closeCustModal() {
+      document.getElementById('custModal').classList.add('hidden');
+    }
+
+    async function saveCustEdits(e) {
+      e.preventDefault();
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'updateCustomer',
+            customerId: document.getElementById('modCustId').value,
+            name: document.getElementById('modCustName').value,
+            phone: document.getElementById('modCustPhone').value,
+            meterNumber: document.getElementById('modCustMeter').value,
+            type: document.getElementById('modCustType').value,
+            location: document.getElementById('modCustLoc').value,
+            rate: document.getElementById('modCustRate').value
+          })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          alert('✅ Customer updated!');
+          closeCustModal();
+          loadCusts();
+        }
+      } catch(err) {
+        alert('❌ Error: ' + err.message);
+      }
+    }
+
+    async function addCust(e) {
+      e.preventDefault();
+      const payload = {
+        action: 'createCustomer',
+        phone: document.getElementById('custPhone').value,
+        name: document.getElementById('custName').value,
+        type: document.getElementById('custType').value,
+        meterNumber: document.getElementById('custMeter').value,
+        location: document.getElementById('custLoc').value,
+        email: document.getElementById('custEmail').value,
+        rate: document.getElementById('custRate').value
+      };
+
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          document.getElementById('custMsg').innerHTML = '<div class="p-3 bg-green-100 text-green-700 rounded text-sm">✅ ' + data.message + '</div>';
+          e.target.reset();
+          loadDash();
+        }
+      } catch(err) {
+        document.getElementById('custMsg').innerHTML = '<div class="p-3 bg-red-100 text-red-700 rounded text-sm">❌ Error: ' + err.message + '</div>';
+      }
+    }
+
+    async function populateMeterDetails() {
+      const meterNo = document.getElementById('readCustId').value.toUpperCase().trim();
+      if (!meterNo) return;
+
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getAllCustomers' })
+        });
+        const data = await res.json();
+        
+        if (data.success && data.customers.length > 0) {
+          // Find customer by meter number
+          const customer = data.customers.find(c => c.meterNumber.toUpperCase() === meterNo);
+          
+          if (customer) {
+            // Populate customer ID field
+            document.getElementById('readMeterId').value = customer.customerId;
+            
+            // Get meter details (previous reading)
+            const meterRes = await fetch(API, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ action: 'getMeterDetails', customerId: customer.customerId })
+            });
+            const meterData = await meterRes.json();
+            
+            if (meterData.success) {
+              document.getElementById('readPrev').value = meterData.previousReading;
+              document.getElementById('custNameDisplay').innerText = '✅ Customer: ' + meterData.customerName + ' (' + customer.customerId + ')';
+              document.getElementById('custRateDisplay').innerText = '📊 Rate: KES ' + Number(meterData.rate).toFixed(2) + ' per unit';
+            }
+          } else {
+            document.getElementById('custNameDisplay').innerText = '❌ Meter not found';
+            document.getElementById('custRateDisplay').innerText = '';
+            document.getElementById('readMeterId').value = '';
+            document.getElementById('readPrev').value = '';
+          }
+        } else {
+          document.getElementById('custNameDisplay').innerText = '❌ No customers found';
+          document.getElementById('custRateDisplay').innerText = '';
+        }
+      } catch(err) {
+        console.error(err);
+        document.getElementById('custNameDisplay').innerText = '❌ Error: ' + err.message;
+      }
+    }
+
+    async function addReading(e) {
+      e.preventDefault();
+      const customerId = document.getElementById('readMeterId').value.trim();
+      
+      if (!customerId) {
+        alert('❌ Please enter a valid Meter No. and wait for customer to populate');
+        return;
+      }
+      
+      const payload = {
+        action: 'recordMeterReading',
+        customerId: customerId,
+        reading: document.getElementById('readValue').value,
+        recordedBy: document.getElementById('readBy').value
+      };
+
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          document.getElementById('readMsg').innerHTML = '<div class="p-3 bg-green-100 text-green-700 rounded text-sm">✅ Invoice ' + data.invoiceId + ' created! Consumption: ' + data.consumption + ' units @ KES ' + Number(data.rate).toFixed(2) + ' = KES ' + Number(data.amount).toLocaleString() + '</div>';
+          document.getElementById('readValue').value = '';
+          document.getElementById('readBy').value = '';
+          setTimeout(() => loadInvoices(), 1000);
+        } else {
+          document.getElementById('readMsg').innerHTML = '<div class="p-3 bg-red-100 text-red-700 rounded text-sm">❌ ' + (data.message || 'Error creating invoice') + '</div>';
+        }
+      } catch(err) {
+        document.getElementById('readMsg').innerHTML = '<div class="p-3 bg-red-100 text-red-700 rounded text-sm">❌ Error: ' + err.message + '</div>';
+      }
+    }
+
+    async function populateCustomerName() {
+      const custId = document.getElementById('payCustomerId').value.toUpperCase();
+      if (!custId) {
+        document.getElementById('payCustomerNameDisplay').innerText = '';
+        document.getElementById('payOutstandingDisplay').innerText = '';
+        return;
+      }
+
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getCustomerByIdForPayment', customerId: custId })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          document.getElementById('payCustomerNameDisplay').innerText = '✅ ' + data.name;
+          document.getElementById('payOutstandingDisplay').innerText = 'Outstanding: KES ' + Number(data.outstandingBalance).toLocaleString();
+        } else {
+          document.getElementById('payCustomerNameDisplay').innerText = '❌ ' + data.message;
+          document.getElementById('payOutstandingDisplay').innerText = '';
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function recordPayment(e) {
+      e.preventDefault();
+      
+      const custId = document.getElementById('payCustomerId').value;
+      const reference = document.getElementById('payRef').value;
+      
+      if (!reference) {
+        document.getElementById('payMsg').innerHTML = '<div class="p-3 bg-red-100 text-red-700 rounded text-sm">❌ Reference number is required</div>';
+        return;
+      }
+
+      const payload = {
+        action: 'recordPayment',
+        customerId: custId,
+        invoiceId: document.getElementById('payInvoiceId').value,
+        amount: document.getElementById('payAmount').value,
+        method: document.getElementById('payMethod').value,
+        reference: reference,
+        notes: document.getElementById('payNotes').value
+      };
+
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          currentPayment = data;
+          showPaymentReceipt(data);
+          document.getElementById('payMsg').innerHTML = '<div class="p-3 bg-green-100 text-green-700 rounded text-sm">✅ Payment ' + data.paymentId + ' recorded!</div>';
+          e.target.reset();
+          loadDash();
+        } else {
+          document.getElementById('payMsg').innerHTML = '<div class="p-3 bg-red-100 text-red-700 rounded text-sm">❌ ' + data.message + '</div>';
+        }
+      } catch(err) {
+        document.getElementById('payMsg').innerHTML = '<div class="p-3 bg-red-100 text-red-700 rounded text-sm">❌ Error: ' + err.message + '</div>';
+      }
+    }
+
+    function showPaymentReceipt(payment) {
+      const dateStr = new Date().toLocaleDateString('en-KE');
+      const html = `
+        <p class="text-2xl font-bold text-green-600 mb-3">✅ PAYMENT RECEIVED</p>
+        <p class="text-lg font-bold text-gray-800">${appConfig.COMPANY_NAME || 'Joy Water Supplies'}</p>
+        <div class="border-t-2 border-b-2 border-green-600 py-3 my-3">
+          <p class="text-3xl font-bold text-green-600">KES ${Number(payment.amount).toLocaleString()}</p>
+          <p class="text-xs text-gray-600">via ${payment.method}</p>
+        </div>
+        <p class="text-sm text-gray-700"><strong>Dear ${payment.customerName},</strong></p>
+        <p class="text-xs text-gray-600 mt-2">📅 Date: ${dateStr}</p>
+        <p class="text-sm font-bold text-gray-800 mt-3">Remaining Balance: <span class="text-red-600">KES ${Number(payment.remainingBalance).toLocaleString()}</span></p>
+        <p class="text-xs text-gray-600 mt-3">Thank you for your prompt payment!</p>
+      `;
+      
+      document.getElementById('receiptContent').innerHTML = html;
+      document.getElementById('paymentReceiptModal').classList.remove('hidden');
+      
+      // Store payment for sharing
+      window.currentPaymentForShare = payment;
+    }
+
+    function closePaymentReceipt() {
+      document.getElementById('paymentReceiptModal').classList.add('hidden');
+      window.currentPaymentForShare = null;
+    }
+
+    function shareReceiptWhatsApp() {
+      const p = window.currentPaymentForShare || currentPayment;
+      if (!p) {
+        alert('❌ No payment data available');
+        return;
+      }
+      
+      const dateStr = new Date().toLocaleDateString('en-KE');
+      
+      const msg = encodeURIComponent(
+        `✅ *Payment Received – ${appConfig.COMPANY_NAME || 'Joy Water Supplies'}*\n\n` +
+        `💚 *KES ${Number(p.amount).toLocaleString()}* via ${p.method}\n` +
+        `📅 Date: ${dateStr}\n\n` +
+        `Remaining Balance: *KES ${Number(p.remainingBalance).toLocaleString()}*\n\n` +
+        `🏪 *${appConfig.COMPANY_NAME || 'Joy Water Supplies'}*\n` +
+        `Thank you for your prompt payment!`
+      );
+      
+      const phone = String(p.customerPhone).replace(/[^0-9]/g, '');
+      if (!phone) {
+        alert('❌ Customer phone number not available');
+        return;
+      }
+      
+      window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+    }
+
+    async function loadInvs() {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getInvoices' })
+        });
+        const data = await res.json();
+        
+        if (data.success && data.invoices.length > 0) {
+          document.getElementById('invList').innerHTML = data.invoices.map(i => `
+            <tr>
+              <td class="border p-2 font-mono text-xs">${i.invoiceId}</td>
+              <td class="border p-2">${i.name}</td>
+              <td class="border p-2">${i.meterNumber}</td>
+              <td class="border p-2 text-center font-bold">KES ${Number(i.rate).toFixed(2)}</td>
+              <td class="border p-2 text-right font-bold">KES ${Number(i.amount).toLocaleString()}</td>
+              <td class="border p-2 text-center"><span class="px-2 py-1 rounded text-xs font-bold ${i.status === 'UNPAID' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">${i.status}</span></td>
+              <td class="border p-2 text-center"><button onclick="viewInvoice('${i.invoiceId}')" class="text-blue-600 hover:underline text-xs font-bold">View</button></td>
+            </tr>
+          `).join('');
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function loadDebtors() {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getDebtors' })
+        });
+        const data = await res.json();
+        
+        if (data.success && data.debtors.length > 0) {
+          document.getElementById('debtorsList').innerHTML = data.debtors.map(d => `
+            <tr class="hover:bg-red-50">
+              <td class="border p-2">${d.name}</td>
+              <td class="border p-2 text-xs">${d.phone}</td>
+              <td class="border p-2">${d.meterNumber}</td>
+              <td class="border p-2 text-center font-bold">KES ${Number(d.rate).toFixed(2)}</td>
+              <td class="border p-2 text-right font-bold text-red-600">KES ${Number(d.amount).toLocaleString()}</td>
+              <td class="border p-2 text-center font-mono text-xs">${d.invoiceId}</td>
+              <td class="border p-2 text-center text-xs">${new Date(d.dueDate).toLocaleDateString()}</td>
+            </tr>
+          `).join('');
+        } else {
+          document.getElementById('debtorsList').innerHTML = '<tr><td colspan="7" class="border p-4 text-center text-gray-600">No debtors found</td></tr>';
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function loadOwnerDash() {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getOwnerDashboard' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          document.getElementById('ownerTotalMonth').innerText = Number(data.totalThisMonth).toLocaleString();
+          
+          if (data.customers.length > 0) {
+            document.getElementById('ownerList').innerHTML = data.customers.map(c => {
+              const invDate = c.currentInvoiceDate ? new Date(c.currentInvoiceDate).toLocaleDateString('en-KE') : '-';
+              const paymentBadge = c.paymentStatus === 'PAID' 
+                ? '<span class="px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700">PAID ✓</span>'
+                : c.paymentStatus === 'PARTIAL'
+                ? '<span class="px-2 py-1 rounded text-xs font-bold bg-yellow-100 text-yellow-700">PARTIAL</span>'
+                : '<span class="px-2 py-1 rounded text-xs font-bold bg-red-100 text-red-700">UNPAID</span>';
+              
+              return `
+              <tr>
+                <td class="border p-2 font-mono text-xs">${c.customerId}</td>
+                <td class="border p-2">${c.name}</td>
+                <td class="border p-2 text-xs">${c.phone}</td>
+                <td class="border p-2">${c.meterNumber}</td>
+                <td class="border p-2 text-center font-bold">KES ${Number(c.rate).toFixed(2)}</td>
+                <td class="border p-2 text-right font-bold">KES ${Number(c.currentInvoiceAmount).toLocaleString()}</td>
+                <td class="border p-2 text-right font-bold text-blue-600">KES ${Number(c.amountPaid).toLocaleString()}</td>
+                <td class="border p-2 text-right font-bold text-red-600">KES ${Number(c.outstandingBalance).toLocaleString()}</td>
+                <td class="border p-2 text-center">${paymentBadge}</td>
+                <td class="border p-2 text-xs text-gray-600">${invDate}</td>
+                <td class="border p-2 text-center"><span class="px-2 py-1 rounded text-xs font-bold ${c.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${c.status}</span></td>
+              </tr>
+            `;
+            }).join('');
+          }
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function viewInvoice(invId) {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'getInvoiceById', invoiceId: invId })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          currentInvoice = data.invoice;
+          renderInvoice();
+          document.getElementById('invModal').classList.remove('hidden');
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    function renderInvoice() {
+      const i = currentInvoice;
+      const dateStr = new Date(i.date).toLocaleDateString('en-KE');
+      
+      document.getElementById('invContent').innerHTML = `
+        <div class="font-sans text-sm">
+          <div class="text-center mb-4 pb-3 border-b-2">
+            <div class="text-lg font-bold text-pink-600">${appConfig.COMPANY_NAME || 'JOY WATER SUPPLIES'}</div>
+            <div class="text-xs text-gray-600">${appConfig.COMPANY_PHONE}</div>
+            <div class="text-lg font-bold text-pink-600 mt-2">INVOICE</div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3 mb-3 text-xs">
+            <div><p class="font-bold">NAME: ${i.name}</p><p class="font-bold">METER: ${i.meterNumber}</p></div>
+            <div class="text-right"><p class="font-bold">Date: ${dateStr}</p><p class="font-bold">TILL: ${appConfig.MPESA_TILL}</p></div>
+          </div>
+          
+          <table class="w-full text-xs border-collapse mb-3">
+            <thead>
+              <tr class="border-b-2 border-gray-400">
+                <th class="text-left p-1">DESCRIPTION</th>
+                <th class="text-right p-1">READINGS</th>
+                <th class="text-right p-1">UNITS</th>
+                <th class="text-right p-1">RATE</th>
+                <th class="text-right p-1">AMOUNT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b"><td class="p-1">Previous Reading</td><td class="text-right p-1 font-mono">${i.previousReading}</td><td></td><td></td><td></td></tr>
+              <tr class="border-b"><td class="p-1">Current Reading</td><td class="text-right p-1 font-mono">${i.currentReading}</td><td></td><td></td><td></td></tr>
+              <tr class="border-b-2 border-gray-400"><td class="p-1 font-bold">Consumption</td><td></td><td class="text-right p-1 font-bold">${i.consumption}</td><td class="text-right p-1 font-bold">KES ${Number(i.rate).toFixed(2)}</td><td class="text-right p-1 font-bold">KES ${Number(i.amount).toLocaleString()}</td></tr>
+            </tbody>
+          </table>
+          
+          <div class="flex justify-between items-center border-t-2 border-gray-400 pt-2 font-bold">
+            <div>TOTAL</div>
+            <div class="text-lg text-pink-600">KES ${Number(i.amount).toLocaleString()}</div>
+          </div>
+          
+          <div class="text-center mt-3 text-xs"><p>Status: ${i.status}</p><p class="text-pink-600 font-bold mt-2">Accounts are due on demand</p></div>
+        </div>
+      `;
+    }
+
+    function closeInvModal() {
+      document.getElementById('invModal').classList.add('hidden');
+      currentInvoice = null;
+    }
+
+    function printInvoice() {
+      if (!currentInvoice) {
+        alert('❌ No invoice to print');
+        return;
+      }
+      
+      try {
+        const printWindow = window.open('', '', 'height=600,width=800');
+        if (!printWindow) {
+          alert('❌ Please allow popups to print');
+          return;
+        }
+        
+        printWindow.document.write(document.getElementById('invContent').innerHTML);
+        printWindow.document.close();
+        printWindow.print();
+      } catch(err) {
+        alert('❌ Print error: ' + err.message);
+      }
+    }
+
+    function shareWhatsApp() {
+      if (!currentInvoice) {
+        alert('❌ No invoice data available');
+        return;
+      }
+      
+      const i = currentInvoice;
+      
+      // Normalize phone number
+      let phone = String(i.phone || '').replace(/[^0-9]/g, '');
+      
+      if (!phone) {
+        alert('❌ Customer phone number not available');
+        return;
+      }
+      
+      // Ensure +254 format
+      if (phone.startsWith('254')) {
+        phone = phone; // Already correct
+      } else if (phone.startsWith('0')) {
+        phone = '254' + phone.substring(1);
+      }
+      
+      const msg = encodeURIComponent(
+        `Hello ${i.name},\n\n` +
+        `Your water invoice is ready:\n\n` +
+        `Meter: ${i.meterNumber}\n` +
+        `Consumption: ${i.consumption} units @ KES ${Number(i.rate).toFixed(2)}\n` +
+        `TOTAL DUE: KES ${Number(i.amount).toLocaleString()}\n\n` +
+        `Please pay via M-Pesa Till: ${appConfig.MPESA_TILL}\n` +
+        `Thank you for choosing ${appConfig.COMPANY_NAME || 'Joy Water Supplies'}!`
+      );
+      
+      const waUrl = `https://wa.me/${phone}?text=${msg}`;
+      window.open(waUrl, '_blank');
+    }
+
+    function tab(name) {
+      document.querySelectorAll('[id$="Tab"]').forEach(el => el.classList.add('hidden'));
+      document.getElementById(name + 'Tab').classList.remove('hidden');
+      document.querySelectorAll('.tabBtn').forEach(el => el.classList.remove('bg-white', 'text-pink-600'));
+      event.target.classList.add('bg-white', 'text-pink-600');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadConfig();
+      const saved = localStorage.getItem('admin');
+      if (saved) {
+        admin = JSON.parse(saved);
+        showDash();
+        loadDash();
+      }
+    });
+  </script>
+
+</body>
+</html>
